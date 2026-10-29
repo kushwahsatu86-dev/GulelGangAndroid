@@ -1,0 +1,157 @@
+
+name: Build Gulel Gang APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Create Android project
+        shell: bash
+        run: |
+          set -e
+
+          test -f index.html || {
+            echo "ERROR: Upload your game as index.html first."
+            exit 1
+          }
+
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/gulelgang/game
+
+          cp index.html app/src/main/assets/index.html
+
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "GulelGang"
+          include(":app")
+          EOF
+
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.7.3" apply false
+          }
+          EOF
+
+          cat > gradle.properties <<'EOF'
+          android.useAndroidX=true
+          org.gradle.jvmargs=-Xmx2048m
+          EOF
+
+          cat > app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+          }
+
+          android {
+              namespace = "com.gulelgang.game"
+              compileSdk = 35
+
+              defaultConfig {
+                  applicationId = "com.gulelgang.game"
+                  minSdk = 23
+                  targetSdk = 28
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <application
+                  android:label="Gulel Gang"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:hardwareAccelerated="true">
+                  <activity
+                      android:name=".MainActivity"
+                      android:screenOrientation="landscape"
+                      android:configChanges="orientation|screenSize|keyboardHidden"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/java/com/gulelgang/game/MainActivity.java <<'EOF'
+          package com.gulelgang.game;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.view.View;
+
+          public class MainActivity extends Activity {
+              @Override
+              protected void onCreate(Bundle state) {
+                  super.onCreate(state);
+
+                  getWindow().getDecorView().setSystemUiVisibility(
+                      View.SYSTEM_UI_FLAG_FULLSCREEN
+                      | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                      | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  );
+
+                  WebView web = new WebView(this);
+                  web.setWebViewClient(new WebViewClient());
+                  web.getSettings().setJavaScriptEnabled(true);
+                  web.getSettings().setDomStorageEnabled(true);
+                  web.getSettings().setDatabaseEnabled(true);
+                  setContentView(web);
+                  web.loadUrl("file:///android_asset/index.html");
+              }
+          }
+          EOF
+
+      - name: Build APK
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GulelGang-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
