@@ -1,603 +1,227 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>गुलेल गैंग</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101a3c">
+<title>M Sky Adventure — 100 Levels</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='0' y2='1'%3E%3Cstop stop-color='%2369f0cf'/%3E%3Cstop offset='1' stop-color='%232b8dff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='128' height='128' rx='28' fill='%23101a3c'/%3E%3Cpath d='M24 98V30h20l20 29 20-29h20v68H84V59L64 83 44 59v39z' fill='url(%23g)' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1233; touch-action: none; -webkit-user-select: none; user-select: none;
-    font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", system-ui, sans-serif; color: #fff7e8; }
-  body { display: flex; align-items: center; justify-content: center; }
-  canvas#cv { display: block; touch-action: none; }
-  #ov { position: fixed; inset: 0; display: flex; background: rgba(26,18,51,0.9); padding: 16px; box-sizing: border-box; overflow: auto; z-index: 5; -webkit-user-select: none; }
-  #ov.hidden { display: none; }
-  .wrap { margin: auto; max-width: 980px; width: 100%; text-align: center; }
-  h1 { font-size: clamp(30px, 7vw, 60px); margin: 0 0 6px; color: #ffcf5a; }
-  p { font-size: clamp(15px, 2.8vw, 20px); margin: 6px 0; line-height: 1.5; color: #f3e6d0; }
-  #stars { font-size: 44px; color: #ffcf5a; margin: 2px 0; }
-  .row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
-  .row.col { flex-direction: column; align-items: center; }
-  button { font: inherit; font-size: 20px; padding: 12px 26px; border-radius: 14px; border: 0; cursor: pointer; color: #1a1233; background: #ffcf5a; }
-  button.alt { background: transparent; color: #ffcf5a; border: 2px solid #ffcf5a; }
-  button[disabled] { opacity: 0.4; cursor: default; }
-  .row.col button { min-width: 260px; }
-  #hb { position: fixed; top: 8px; right: 8px; display: none; gap: 8px; z-index: 4; }
-  #hb button { padding: 6px 14px; font-size: 16px; border-radius: 10px; }
-  .grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-top: 12px; }
-  .card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,207,90,0.35); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .card canvas { width: 72px; height: 72px; }
-  .card b { font-size: 18px; color: #ffcf5a; }
-  .card span { font-size: 13px; color: #f3e6d0; line-height: 1.35; min-height: 2.7em; }
-  .card button { font-size: 14px; padding: 7px 12px; border-radius: 10px; margin-top: 4px; }
-  .lv { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 14px; }
-  .lvb { padding: 10px 0; font-size: 22px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
-  .lvb small { font-size: 13px; }
+:root{color-scheme:dark;--mint:#69f0cf;--blue:#43b6ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101a3c;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;touch-action:none;user-select:none}
+#gameShell{position:fixed;inset:0;background:#101a3c;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:absolute;inset:0;pointer-events:none;color:#fff}
+.pill{background:rgba(7,16,49,.76);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 24px #07112c40;border-radius:18px;padding:8px 13px;font-weight:800;font-size:clamp(11px,1.65vw,17px);backdrop-filter:blur(8px)}
+#topbar{position:absolute;top:max(10px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:8px}
+#levelLabel{white-space:nowrap}
+#stats{display:flex;gap:7px}
+#difficulty{margin-left:auto}
+.hudBtn{pointer-events:auto;color:white;border:1px solid #ffffff40;background:#152854c9;border-radius:16px;padding:8px 12px;font-size:18px;min-width:48px;min-height:42px;font-weight:900}
+#controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:0;right:0;display:flex;align-items:end;justify-content:space-between;padding:0 4vw;pointer-events:none}
+.controlGroup{display:flex;gap:12px;align-items:center}
+.ctrl{pointer-events:auto;width:clamp(56px,10vw,84px);height:clamp(56px,10vw,84px);border-radius:22px;border:2px solid #ffffff70;background:linear-gradient(145deg,#254775e8,#101c43e8);box-shadow:inset 0 2px #ffffff25,0 8px 18px #08112c70;color:white;font-size:clamp(23px,4vw,36px);font-weight:900;display:grid;place-items:center;touch-action:none}
+.ctrl:active,.ctrl.active{transform:translateY(2px);background:linear-gradient(145deg,#3ca5e8,#1b4c89)}
+#jump{width:clamp(68px,12vw,98px);height:clamp(68px,12vw,98px);border-radius:50%;background:linear-gradient(145deg,#ffe98d,#d69b2b);border:3px solid #fff1a9;color:#162447;font-size:clamp(27px,4.5vw,39px)}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#07112cd9,#102e56c9);padding:18px}
+.panel{width:min(560px,92vw);max-height:92%;overflow:auto;text-align:center;background:linear-gradient(150deg,#1d3970f5,#101a3cf5);border:1px solid #ffffff38;border-radius:26px;padding:clamp(18px,4vw,30px);box-shadow:0 24px 70px #0008}
+.logo{width:66px;height:66px;margin:0 auto 8px;border-radius:19px;background:linear-gradient(145deg,#6df5d3,#277cff);display:grid;place-items:center;color:#0e1b3e;font-weight:1000;font-size:40px;border:3px solid #e4fff7;box-shadow:0 8px 28px #3bc7ff55}
+h1{margin:8px 0;font-size:clamp(22px,4vw,34px);line-height:1.05}
+.sub{color:#c3d8ff;font-size:14px;line-height:1.5;margin:8px 0 18px}
+.row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.choice,.primary,.secondary{border:1px solid #ffffff35;border-radius:14px;padding:11px 15px;color:#fff;background:#263f70;font-weight:800;font-size:14px}
+.choice.selected{background:linear-gradient(135deg,#69f0cf,#38a8ff);color:#10203f;border-color:#c4fff0}
+.primary{background:linear-gradient(135deg,#73f4d2,#3ca9ff);color:#0c1c3a;border:0;min-width:180px;font-size:16px;box-shadow:0 7px 18px #37b6d844}
+.secondary{background:#ffffff12}
+#levelGrid{display:grid;grid-template-columns:repeat(10,minmax(22px,1fr));gap:5px;margin:12px 0}
+.levelCell{border:1px solid #ffffff22;background:#172951;color:#a8bbdf;border-radius:7px;padding:7px 0;font-size:11px;font-weight:800}
+.levelCell.open{background:#254e79;color:#fff}
+.levelCell.done{background:#1b886f;color:#fff}
+.note{font-size:11px;color:#b7c9ed;margin-top:12px}
+#toast{position:absolute;left:50%;top:24%;transform:translate(-50%,-10px);opacity:0;background:#091633e8;border:1px solid #ffffff45;border-radius:15px;padding:10px 15px;font-weight:800;transition:.2s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (orientation:portrait){
+ /* Place the rotated landscape viewport inside the portrait viewport.
+    Setting left to 100vw prevents the game from being pushed off-screen. */
+ #gameShell{inset:auto;left:100vw;top:0;width:100dvh;height:100vw;transform-origin:top left;transform:rotate(90deg);}
+}
 </style>
 </head>
 <body>
-<canvas id="cv"></canvas>
-<div id="hb"><button id="rs" class="alt">फिर से</button><button id="mn" class="alt">मेन्यू</button></div>
-<div id="ov"></div>
-
-
-<script src="matter.min.js"></script>
-<script>if (typeof Matter === "undefined") document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"><\/script>');</script>
+<div id="gameShell">
+<canvas id="c" aria-label="M Sky Adventure game"></canvas>
+<div id="hud">
+ <div id="topbar">
+  <div class="pill" id="levelLabel">LEVEL 1 / 100</div>
+  <div id="stats"><div class="pill">◆ <span id="coins">0</span></div><div class="pill">♥ <span id="lives">3</span></div></div>
+  <div class="pill" id="difficulty">NORMAL</div>
+  <button class="hudBtn" id="pause" aria-label="Pause">Ⅱ</button>
+ </div>
+ <div id="controls">
+  <div class="controlGroup"><button class="ctrl" id="left" aria-label="Left">◀</button><button class="ctrl" id="right" aria-label="Right">▶</button></div>
+  <button class="ctrl" id="jump" aria-label="Jump">⬆</button>
+ </div>
+ <div id="toast"></div>
+</div>
+<div id="overlay">
+ <div class="panel" id="panel">
+  <div class="logo">M</div>
+  <h1>M SKY ADVENTURE</h1>
+  <div class="sub">100 अलग-अलग प्लेटफ़ॉर्म लेवल • रंगीन 3D-जैसा लुक • कॉइन, दुश्मन और सेव प्रोग्रेस</div>
+  <div style="font-weight:800">कठिनाई चुनें</div>
+  <div class="row" id="difficultyChoices">
+   <button class="choice" data-diff="easy">आसान</button>
+   <button class="choice selected" data-diff="normal">सामान्य</button>
+   <button class="choice" data-diff="hard">कठिन</button>
+  </div>
+  <div class="row"><button class="primary" id="start">गेम शुरू करें ▶</button><button class="secondary" id="levelsBtn">लेवल चुनें</button></div>
+  <div class="note">लैंडस्केप स्क्रीन अपने-आप • गिरने पर सुरक्षित चेकपॉइंट से वापसी • प्रोग्रेस इस डिवाइस में सेव</div>
+ </div>
+</div>
+</div>
 <script>
-(() => {
-  const W = 1280, H = 720, GY = 640, LCOUNT = 20;
-  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
-  const ov = document.getElementById("ov"), hb = document.getElementById("hb");
-  const $ = id => document.getElementById(id);
-  cv.width = W; cv.height = H;
-  function fit() { const s = Math.min(innerWidth / W, innerHeight / H); cv.style.width = W * s + "px"; cv.style.height = H * s + "px"; }
-  addEventListener("resize", fit); fit();
-
-  if (typeof Matter === "undefined") {
-    ov.innerHTML = "<div class='wrap'><h1>गुलेल गैंग</h1><p>गेम की physics library लोड नहीं हुई. एक बार इंटरनेट चालू करके पेज खोलें, या matter.min.js फ़ाइल इसी फ़ोल्डर में रखें.</p></div>";
-    return;
-  }
-  const { Engine, Bodies, Body, Composite, Events } = Matter;
-  const ANCH = { x: 230, y: 500 };
-
-  // ---------- save ----------
-  const KEY = "gulel_gang_save_v2";
-  let save = { coins: 60, unlocked: [0], team: [0], stars: {}, maxL: 0, currentLevel: 0, muted: false };
-  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === "object") save = Object.assign(save, s); } catch (e) {}
-  function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} }
-
-  // ---------- 15 original birds ----------
-  const TYPES = [
-    { name: "पीलू",     color: "#ffd23f", acc: "#c26a00", r: 18, dens: 0.004,  power: "dash",      cost: 0,    desc: "टैप पर तेज़ रफ़्तार" },
-    { name: "नीलू",     color: "#4a6fe3", acc: "#cfe0ff", r: 16, dens: 0.0035, power: "split3",    cost: 120,  desc: "टैप पर 3 में बँट जाती है" },
-    { name: "तोता",     color: "#3fbf7f", acc: "#ff8a2a", r: 17, dens: 0.004,  power: "boomerang", cost: 200,  desc: "टैप पर पीछे मुड़ जाता है" },
-    { name: "गुलाबो",   color: "#ef6f9b", acc: "#ffffff", r: 17, dens: 0.003,  power: "float",     cost: 300,  desc: "टैप पर हवा में तैरती है" },
-    { name: "कालू",     color: "#3a3a4a", acc: "#ffd23f", belly: "#7a7a90", r: 19, dens: 0.0045, power: "bomb", cost: 450, desc: "टैप पर धमाका करता है" },
-    { name: "सफ़ेदा",   color: "#f1f1f5", acc: "#e0526b", belly: "#ffe9c2", r: 17, dens: 0.0035, power: "egg", cost: 600, desc: "टैप पर नीचे बम-अंडा गिराती है" },
-    { name: "संतरी",    color: "#ff8f1f", acc: "#fff3c4", r: 18, dens: 0.0045, power: "dive",      cost: 800,  desc: "टैप पर सीधी नीचे झपटती है" },
-    { name: "जामुनी",   color: "#9a5de0", acc: "#ffd23f", r: 16, dens: 0.0035, power: "split5",    cost: 1000, desc: "टैप पर 5 में बँटती है" },
-    { name: "भोलू",     color: "#9a6a3c", acc: "#f6d9a8", r: 21, dens: 0.0045, power: "giant",     cost: 1300, desc: "टैप पर बड़ा और भारी हो जाता है" },
-    { name: "फ़िरोज़ी",  color: "#22c7c0", acc: "#07524f", r: 17, dens: 0.0035, power: "bounce",    cost: 1600, desc: "टैप पर उछलने वाली गेंद बनती है" },
-    { name: "सुनहरी",   color: "#e6b422", acc: "#ffffff", r: 18, dens: 0.005,  power: "hammer",    cost: 2000, desc: "टैप पर पत्थर तोड़ने की ताक़त" },
-    { name: "चाँदी",    color: "#b9c4d6", acc: "#3b4a63", r: 17, dens: 0.004,  power: "rocket",    cost: 2500, desc: "टैप पर रॉकेट की तरह भागती है" },
-    { name: "लहरिया",   color: "#a8d62f", acc: "#2d5a0a", r: 17, dens: 0.0035, power: "wave",      cost: 3000, desc: "टैप पर लहराती हुई उड़ती है" },
-    { name: "केसरी",    color: "#d1495b", acc: "#ffe3a0", r: 18, dens: 0.004,  power: "cluster",   cost: 3500, desc: "टैप पर 3 छोटे बम गिराती है" },
-    { name: "राजा",     color: "#2d3a8c", acc: "#ffd23f", r: 20, dens: 0.0055, power: "royal",     cost: 4500, desc: "टैप पर तेज़, और टकराते ही बड़ा धमाका" }
-  ];
-
-  // ---------- level generator (stable by construction) ----------
-  // ---GEN-START
-  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-  function genLevel(L, GY) {
-    const r = mulberry32(L * 977 + 13), pick = a => a[Math.floor(r() * a.length)];
-    const nT = Math.min(4, 1 + Math.floor(L / 3));
-    const stoneP = Math.max(0, Math.min(0.85, (L - 2) * 0.08));
-    const nTargets = Math.min(10, 2 + Math.floor(L / 2));
-    const nShield = Math.min(3, Math.floor(L / 6));
-    const birds = Math.min(7, 3 + Math.floor(L / 4));
-    const guests = L >= 1 ? 1 + (L >= 9 ? 1 : 0) + (L >= 15 ? 1 : 0) : 0;
-    const items = [], slots = [];
-    const mat = p => (r() < p ? "stone" : "wood");
-    let spans = []; for (let i = 0; i < nT; i++) spans.push(pick([80, 90, 100]));
-    let gap = nT > 1 ? 70 + Math.floor(r() * 30) : 0;
-    let totalW = spans.reduce((a, s) => a + s + 40, 0) + gap * (nT - 1);
-    if (totalW > 520) { spans = spans.map(() => 80); gap = nT > 1 ? 70 : 0; totalW = spans.reduce((a, s) => a + s + 40, 0) + gap * (nT - 1); }
-    let cursor = Math.max(700, Math.min(780 + Math.floor(r() * 60), 1235 - totalW));
-    const towers = [];
-    for (let i = 0; i < nT; i++) {
-      const span = spans[i], width = span + 40, cx = cursor + width / 2, left = cursor, right = cursor + width;
-      const maxF = Math.min(4, 1 + Math.floor(L / 4));
-      const floors = Math.max(1, Math.min(4, maxF - (r() < 0.35 ? 1 : 0)));
-      let base = GY;
-      for (let f = 0; f < floors; f++) {
-        const h = pick([64, 76, 90]), sp = stoneP * (1 - f * 0.15);
-        items.push({ k: "box", x: cx - span / 2, y: base - h / 2, w: 20, h, mat: mat(sp) });
-        items.push({ k: "box", x: cx + span / 2, y: base - h / 2, w: 20, h, mat: mat(sp) });
-        items.push({ k: "box", x: cx, y: base - h - 10, w: span + 40, h: 20, mat: mat(stoneP * 0.7) });
-        slots.push({ x: cx, y: base - 20 });
-        base -= h + 20;
-      }
-      slots.push({ x: cx, y: base - 20 });
-      if (i < nT - 1) slots.push({ x: right + gap / 2, y: GY - 20 });
-      towers.push({ left, right, cx });
-      cursor = right + gap;
-    }
-    const last = towers[towers.length - 1];
-    if (last.right + 50 < 1245) slots.push({ x: last.right + 50, y: GY - 20 });
-    for (let k = 0; k < nShield; k++) {
-      const h = pick([100, 120, 140]);
-      items.push({ k: "box", x: towers[0].left - 45 - k * 45, y: GY - h / 2, w: 22, h, mat: mat(Math.min(0.95, stoneP + 0.25)) });
-    }
-    const n = Math.min(nTargets, slots.length);
-    for (let i = slots.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [slots[i], slots[j]] = [slots[j], slots[i]]; }
-    for (let i = 0; i < n; i++) items.push({ k: "target", x: slots[i].x, y: slots[i].y });
-    return { birds, guests, items };
-  }
-  // ---GEN-END
-
-  // ---------- state ----------
-  let engine, items = [], extras = [], blasts = [], bird = null, lineup = [], li = 0, spec = null;
-  let level = 0, score = 0, levelStartScore = 0, coinsThisLevel = 0, state = "menu", dragging = false;
-  let particles = [], rings = [], floaters = [], shake = 0, endTimer = 0, spawnTimer = 0, tMs = 0;
-
-  // ---------- sound ----------
-  let ac = null;
-  function snd(f, d = 0.12, type = "square", v = 0.05, slide = 0) {
-    if (save.muted) return;
-    try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
-      o.type = type; o.frequency.setValueAtTime(f, t);
-      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + d);
-      g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-      o.connect(g); g.connect(ac.destination); o.start(); o.stop(t + d);
-    } catch (e) {}
-  }
-
-  // ---------- world ----------
-  function addBox(x, y, w, h, mat) {
-    const b = Bodies.rectangle(x, y, w, h, { label: "block", density: mat === "stone" ? 0.004 : 0.002, friction: 0.8, restitution: 0.05, frictionAir: 0.01 });
-    b.hp = b.maxHp = mat === "stone" ? 400 : 140; b.mat = mat; b.w = w; b.h = h; b.hit = 0;
-    Composite.add(engine.world, b); items.push(b);
-  }
-  function addTarget(x, y) {
-    const b = Bodies.circle(x, y, 20, { label: "target", density: 0.0012, friction: 0.5, restitution: 0.2, frictionAir: 0.01 });
-    b.hp = b.maxHp = 30; b.r = 20; b.hit = 0;
-    Composite.add(engine.world, b); items.push(b);
-  }
-  function makeLineup(L, sp) {
-    const team = save.team.length ? save.team : [0], arr = [];
-    for (let i = 0; i < sp.birds; i++) arr.push({ id: team[i % team.length], guest: false });
-    const pool = []; for (let id = 0; id < TYPES.length; id++) if (id <= Math.min(14, 3 + L)) pool.push(id);
-    for (let g = 0; g < Math.min(sp.guests, sp.birds - 1); g++) arr[sp.birds - 1 - g] = { id: pool[Math.floor(Math.random() * pool.length)], guest: true };
-    return arr;
-  }
-  function loadLevel(i) {
-    level = i; save.currentLevel = Math.max(0, Math.min(LCOUNT - 1, i)); persist(); engine = Engine.create(); engine.positionIterations = 8; engine.velocityIterations = 6;
-    items = []; extras = []; blasts = []; particles = []; rings = []; floaters = []; bird = null; dragging = false; shake = 0; endTimer = 0; spawnTimer = 0; coinsThisLevel = 0;
-    levelStartScore = score;
-    Composite.add(engine.world, Bodies.rectangle(W / 2, GY + 50, W * 4, 100, { isStatic: true, label: "ground", friction: 1 }));
-    spec = genLevel(i, GY);
-    for (const it of spec.items) { if (it.k === "box") addBox(it.x, it.y, it.w, it.h, it.mat); else addTarget(it.x, it.y); }
-    lineup = makeLineup(i, spec); li = 0;
-    Events.on(engine, "collisionStart", onCollide);
-    Events.on(engine, "collisionActive", onActive);
-    state = "play"; ov.className = "hidden"; hb.style.display = "flex";
-    nextBird();
-  }
-  function startLevel(i) { score = i === 0 ? 0 : score; loadLevel(i); }
-  function nextBird() {
-    if (li >= lineup.length) { bird = null; return; }
-    const e = lineup[li++], t = TYPES[e.id];
-    bird = Bodies.circle(ANCH.x, ANCH.y, t.r, { label: "bird", density: t.dens, restitution: 0.4, friction: 0.8, frictionAir: 0, collisionFilter: { group: -1 } });
-    Object.assign(bird, { r: t.r, color: t.color, power: t.power, tid: e.id, guest: e.guest, flying: false, used: false, life: 0, slow: 0, dmgMult: 1.5 });
-    Body.setStatic(bird, true); Composite.add(engine.world, bird);
-  }
-  function spawnChild(x, y, r, color, vx, vy, o) {
-    const c = Bodies.circle(x, y, r, { label: "bird", density: o.density || 0.0035, restitution: 0.4, friction: 0.8, frictionAir: 0, collisionFilter: { group: -1 } });
-    Object.assign(c, { r, color, tid: o.tid || 0, kind: o.kind || "bird", bomb: !!o.bomb, bombR: o.bombR, bombP: o.bombP, life: 0, slow: 0, dmgMult: 1.5 });
-    Body.setVelocity(c, { x: vx, y: vy }); Composite.add(engine.world, c); extras.push(c);
-  }
-
-  // ---------- powers ----------
-  function fan(b, angles, r) {
-    const v = b.velocity, p = b.position;
-    for (const a of angles) {
-      const c = Math.cos(a), s = Math.sin(a);
-      spawnChild(p.x, p.y, r, b.color, v.x * c - v.y * s, v.x * s + v.y * c, { kind: "bird", tid: b.tid });
-    }
-  }
-  function useAbility(b) {
-    b.used = true;
-    const v = b.velocity, p = b.position;
-    const ring = () => rings.push({ x: p.x, y: p.y, r: b.r, a: 1 });
-    switch (b.power) {
-      case "dash": Body.setVelocity(b, { x: v.x * 1.55, y: v.y * 1.55 }); ring(); snd(520, 0.18, "sawtooth", 0.05, 500); break;
-      case "split3": fan(b, [-0.22, 0.22], 11); ring(); snd(700, 0.15, "triangle", 0.06, 300); break;
-      case "split5": fan(b, [-0.34, -0.17, 0.17, 0.34], 9); ring(); snd(760, 0.18, "triangle", 0.06, 300); break;
-      case "boomerang": Body.setVelocity(b, { x: -v.x * 0.9, y: v.y * 0.3 - 2 }); ring(); snd(420, 0.2, "triangle", 0.06, -200); break;
-      case "float": b.floatT = 100; ring(); snd(300, 0.3, "sine", 0.06, 300); break;
-      case "bomb": blasts.push({ x: p.x, y: p.y, R: 135, P: 330 }); b.dead = true; break;
-      case "egg": spawnChild(p.x, p.y + b.r + 4, 10, "#fff", 0, 7, { kind: "egg", bomb: true, bombR: 80, bombP: 190, density: 0.008 }); Body.setVelocity(b, { x: v.x * 1.2, y: -7 }); ring(); snd(500, 0.12, "square", 0.05, -200); break;
-      case "dive": Body.setVelocity(b, { x: v.x * 0.15, y: 24 }); ring(); snd(600, 0.2, "sawtooth", 0.05, -450); break;
-      case "giant": Body.scale(b, 1.9, 1.9); b.r *= 1.9; ring(); snd(150, 0.3, "sawtooth", 0.07, 60); break;
-      case "bounce": b.restitution = 1; Body.setVelocity(b, { x: v.x * 1.1, y: v.y * 1.1 }); ring(); snd(700, 0.12, "triangle", 0.06, 200); break;
-      case "hammer": b.hammer = true; b.dmgMult = 2.5; Body.setVelocity(b, { x: v.x * 1.3, y: v.y * 1.3 }); ring(); snd(260, 0.2, "square", 0.06, 200); break;
-      case "rocket": b.rocketT = 45; ring(); snd(200, 0.5, "sawtooth", 0.05, 400); break;
-      case "wave": b.waveT = 80; b.phase = 0; ring(); snd(500, 0.3, "sine", 0.06, 200); break;
-      case "cluster": b.dropN = 3; b.dropCd = 0; ring(); break;
-      case "royal": b.bomb = true; b.bombR = 170; b.bombP = 420; Body.setVelocity(b, { x: v.x * 1.4, y: v.y * 1.4 }); ring(); snd(440, 0.25, "sawtooth", 0.06, 440); break;
-    }
-  }
-  function abilityTick() {
-    const b = bird;
-    if (!b || !b.flying || b.dead) return;
-    if (b.floatT > 0) { b.floatT--; Body.applyForce(b, b.position, { x: 0, y: -b.mass * 0.001 * 0.97 }); }
-    if (b.rocketT > 0) { b.rocketT--; const v = b.velocity, sp = Math.hypot(v.x, v.y); if (sp < 34) Body.setVelocity(b, { x: v.x * 1.03, y: v.y * 1.03 - 0.2 }); }
-    if (b.waveT > 0) { b.waveT--; b.phase += 0.4; Body.setVelocity(b, { x: b.velocity.x, y: b.velocity.y + Math.sin(b.phase) * 1.4 }); }
-    if (b.dropN > 0 && --b.dropCd <= 0) {
-      spawnChild(b.position.x, b.position.y + b.r + 3, 9, "#222", b.velocity.x * 0.5, 1, { kind: "mini", bomb: true, bombR: 70, bombP: 200, density: 0.01 });
-      b.dropN--; b.dropCd = 14; snd(300, 0.08, "square", 0.04, -100);
-    }
-  }
-  function processBlasts() {
-    while (blasts.length) {
-      const e = blasts.pop();
-      rings.push({ x: e.x, y: e.y, r: 10, a: 1.2 });
-      burst(e.x, e.y, ["#ffd23f", "#ff7a2a", "#ffffff"], 26, 8); shake = Math.max(shake, 10); snd(90, 0.35, "sawtooth", 0.1, -40);
-      for (const b of items) {
-        const dx = b.position.x - e.x, dy = b.position.y - e.y, d = Math.hypot(dx, dy) || 1;
-        const size = b.r || Math.max(b.w, b.h) / 2;
-        if (d < e.R + size) {
-          const fall = Math.max(0, 1 - d / (e.R + size));
-          hurt(b, e.P * fall);
-          const s = 9 * fall;
-          Body.setVelocity(b, { x: b.velocity.x + dx / d * s, y: b.velocity.y + dy / d * s - 3 * fall });
-        }
-      }
-    }
-  }
-
-  // ---------- collisions ----------
-  function massOf(b) { return b.isStatic ? 2 : Math.min(b.mass, 8); }
-  function hurt(b, d) { if (b.hp === undefined) return; b.hp -= d; b.hit = 8; }
-  function onCollide(ev) {
-    for (const p of ev.pairs) {
-      const a = p.bodyA, b = p.bodyB;
-      const rv = Math.hypot(a.velocity.x - b.velocity.x, a.velocity.y - b.velocity.y);
-      for (const x of [a, b]) if (x.bomb && !x.done && rv > 1.2) { x.done = true; x.dead = true; blasts.push({ x: x.position.x, y: x.position.y, R: x.bombR, P: x.bombP }); }
-      if (rv < 1.8) continue;
-      const bm = a.label === "bird" ? a : (b.label === "bird" ? b : null), other = bm === a ? b : a;
-      let f = (rv - 1.5) * 2.2 * (bm ? (bm.dmgMult || 1.5) : 1);
-      if (bm && bm.hammer && other.mat === "stone") f *= 3;
-      hurt(a, f * massOf(b)); hurt(b, f * massOf(a));
-      if (rv > 6) snd(150 + Math.random() * 60, 0.07, "triangle", 0.04);
-    }
-  }
-  function onActive(ev) {
-    for (const p of ev.pairs) {
-      const a = p.bodyA, b = p.bodyB;
-      let t = null, o = null;
-      if (a.label === "target" && b.label === "block") { t = a; o = b; } else if (b.label === "target" && a.label === "block") { t = b; o = a; }
-      if (t && o.position.y < t.position.y - 4) { t.hp -= 0.25 * o.mass; t.hit = Math.max(t.hit, 2); }
-    }
-  }
-
-  // ---------- input ----------
-  function pos(ev) { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left) * W / r.width, y: (ev.clientY - r.top) * H / r.height }; }
-  cv.addEventListener("pointerdown", ev => {
-    if (state !== "play" || !bird || bird.dead) return;
-    const p = pos(ev);
-    if (!bird.flying) {
-      if (Math.hypot(p.x - bird.position.x, p.y - bird.position.y) < 90) { dragging = true; cv.setPointerCapture(ev.pointerId); move(p); }
-    } else if (!bird.used) useAbility(bird);
-  });
-  cv.addEventListener("pointermove", ev => { if (dragging) move(pos(ev)); });
-  function move(p) {
-    let dx = p.x - ANCH.x, dy = p.y - ANCH.y; const l = Math.hypot(dx, dy), m = 110;
-    if (l > m) { dx = dx / l * m; dy = dy / l * m; }
-    Body.setPosition(bird, { x: ANCH.x + dx, y: ANCH.y + dy });
-  }
-  addEventListener("pointerup", () => {
-    if (!dragging) return; dragging = false;
-    const dx = ANCH.x - bird.position.x, dy = ANCH.y - bird.position.y;
-    if (Math.hypot(dx, dy) < 15) { Body.setPosition(bird, { x: ANCH.x, y: ANCH.y }); return; }
-    Body.setStatic(bird, false); Body.setVelocity(bird, { x: dx * 0.22, y: dy * 0.22 });
-    bird.flying = true; snd(380, 0.22, "square", 0.05, -250);
-  });
-  $("rs").onclick = () => { score = levelStartScore; loadLevel(level); };
-  $("mn").onclick = () => mainMenu();
-  addEventListener("keydown", e => { if ((e.key === "r" || e.key === "R") && state === "play") { score = levelStartScore; loadLevel(level); } });
-
-  // ---------- logic ----------
-  function burst(x, y, colors, n, sp = 5) {
-    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s = 1 + Math.random() * sp; particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2, life: 40 + Math.random() * 25, c: colors[i % colors.length], s: 3 + Math.random() * 5 }); }
-  }
-  function chips(x, y, colors, n) {
-    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, sp = 2 + Math.random() * 6; particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3, life: 55 + Math.random() * 30, c: colors[i % colors.length], s: 5 + Math.random() * 7, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.5, chip: true }); }
-  }
-  function birdsRemaining() { return (lineup.length - li) + (bird && !bird.flying ? 1 : 0); }
-  function step() {
-    abilityTick();
-    Engine.update(engine, 1000 / 60);
-    processBlasts();
-    for (let i = items.length - 1; i >= 0; i--) {
-      const b = items[i];
-      if (b.hit > 0) b.hit--;
-      const gone = b.hp <= 0, out = b.position.y > H + 150 || b.position.x > W + 300;
-      if (gone || out) {
-        Composite.remove(engine.world, b); items.splice(i, 1);
-        if (gone) {
-          if (b.label === "target") {
-            score += 5000; save.coins += 5; coinsThisLevel += 5; persist();
-            floaters.push({ x: b.position.x, y: b.position.y - 20, t: 50, txt: "+5" });
-            burst(b.position.x, b.position.y, ["#ff7eb6", "#ffd23f", "#7ee0ff", "#fff"], 22, 6); snd(620, 0.2, "triangle", 0.07, 400);
-          } else {
-            score += 500;
-            chips(b.position.x, b.position.y, b.mat === "stone" ? ["#d6a978", "#a97c4f", "#e8c79c"] : ["#b97a3e", "#8a5524", "#d9a066"], 16);
-            snd(110, 0.14, "sawtooth", 0.05, -50);
-          }
-          shake = Math.max(shake, b.label === "target" ? 6 : 3);
-        }
-      }
-    }
-    if (bird && bird.flying) {
-      bird.life++;
-      const sp = Math.hypot(bird.velocity.x, bird.velocity.y);
-      bird.slow = sp < 0.4 ? bird.slow + 1 : 0;
-      if (bird.dead || bird.slow > 50 || bird.life > 480 || bird.position.x > W + 300 || bird.position.y > H + 200) {
-        if (!bird.dead) burst(bird.position.x, bird.position.y, [bird.color, "#fff"], 8, 3);
-        Composite.remove(engine.world, bird); bird = null; spawnTimer = 50;
-      }
-    }
-    for (let i = extras.length - 1; i >= 0; i--) {
-      const c = extras[i]; c.life++;
-      c.slow = Math.hypot(c.velocity.x, c.velocity.y) < 0.4 ? c.slow + 1 : 0;
-      if (c.dead || c.slow > 60 || c.life > 420 || c.position.x > W + 300 || c.position.y > H + 200) {
-        Composite.remove(engine.world, c); extras.splice(i, 1);
-      }
-    }
-    if (!bird && li < lineup.length && state === "play") { if (--spawnTimer <= 0) nextBird(); }
-    const targets = items.filter(b => b.label === "target").length;
-    if (state === "play") {
-      if (targets === 0) { endTimer++; if (endTimer > 60) win(); }
-      else if (!bird && li >= lineup.length && extras.length === 0) { endTimer++; if (endTimer > 220) lose(); }
-      else endTimer = 0;
-    }
-    for (const p of particles) { p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.life--; if (p.chip) p.rot += p.vr; }
-    particles = particles.filter(p => p.life > 0);
-    for (const r of rings) { r.r += 3; r.a -= 0.05; }
-    rings = rings.filter(r => r.a > 0);
-    for (const f of floaters) { f.y -= 0.8; f.t--; }
-    floaters = floaters.filter(f => f.t > 0);
-    if (shake > 0) shake *= 0.9;
-  }
-
-  // ---------- screens ----------
-  function show(html, after) { ov.className = ""; ov.innerHTML = '<div class="wrap">' + html + "</div>"; ov.scrollTop = 0; if (after) after(); }
-  async function goLandscape() {
-    // Orientation locking is allowed only in supported browsers and after a tap.
-    try {
-      const el = document.documentElement;
-      if (el.requestFullscreen && !document.fullscreenElement) {
-        try { await el.requestFullscreen(); } catch (e) {}
-      }
-      if (screen.orientation && screen.orientation.lock) {
-        try { await screen.orientation.lock("landscape"); } catch (e) {}
-      }
-      // Give Android a moment to apply the rotation before opening the next screen.
-      await new Promise(resolve => setTimeout(resolve, 350));
-    } catch (e) {}
-  }
-  function mainMenu() {
-    state = "menu"; hb.style.display = "none";
-    show(`<h1>गुलेल गैंग</h1><p>सिक्के: ${save.coins}</p>
-      <div class="row col"><button id="m1">लेवल चुनें</button><button id="mc">जारी रखें · लेवल ${(save.currentLevel || 0) + 1}</button><button class="alt" id="m2">पक्षी: अनलॉक और टीम</button><button class="alt" id="m3">आवाज़: ${save.muted ? "बंद" : "चालू"}</button></div>`,
-      () => {
-        $("m1").onclick = async () => { await goLandscape(); levelSelect(); };
-        $("mc").onclick = async () => { await goLandscape(); startLevel(Math.min(save.maxL || 0, save.currentLevel || 0)); };
-        $("m2").onclick = () => birdShop();
-        $("m3").onclick = () => { save.muted = !save.muted; persist(); mainMenu(); };
-      });
-  }
-  function levelSelect() {
-    let g = "";
-    for (let i = 0; i < LCOUNT; i++) {
-      const open = i <= save.maxL, st = save.stars[i] || 0;
-      g += `<button class="lvb" data-i="${i}" ${open ? "" : "disabled"}>${i + 1}<small>${open ? "★".repeat(st) + "☆".repeat(3 - st) : "बंद"}</small></button>`;
-    }
-    show(`<h1>लेवल चुनें</h1><div class="lv">${g}</div><div class="row"><button class="alt" id="bk">वापस</button></div>`, () => {
-      ov.querySelectorAll(".lvb").forEach(b => b.onclick = () => startLevel(+b.dataset.i));
-      $("bk").onclick = mainMenu;
-    });
-  }
-  function birdShop() {
-    const sc = ov.scrollTop;
-    let cards = "";
-    TYPES.forEach((t, id) => {
-      const own = save.unlocked.includes(id), inTeam = save.team.includes(id);
-      let btn;
-      if (!own) btn = `<button data-a="buy" data-i="${id}" ${save.coins >= t.cost ? "" : "disabled"}>खोलें · ${t.cost}</button>`;
-      else if (inTeam) btn = `<button class="alt" data-a="rm" data-i="${id}">टीम से हटाएँ</button>`;
-      else btn = `<button data-a="add" data-i="${id}" ${save.team.length >= 3 ? "disabled" : ""}>टीम में जोड़ें</button>`;
-      cards += `<div class="card"><canvas width="144" height="144" data-id="${id}"></canvas><b>${t.name}</b><span>${t.desc}</span>${btn}</div>`;
-    });
-    show(`<h1>पक्षी</h1><p>सिक्के: ${save.coins} · टीम (अधिकतम 3): ${save.team.map(i => TYPES[i].name).join(", ")}</p>
-      <p style="font-size:14px">टीम के पक्षी हर लेवल में आते हैं. कुछ लेवल में रैंडम मेहमान पक्षी भी मिलते हैं.</p>
-      <div class="grid">${cards}</div><div class="row"><button class="alt" id="bk">वापस</button></div>`, () => {
-      ov.querySelectorAll("canvas[data-id]").forEach(c => { const id = +c.dataset.id, g = c.getContext("2d"); drawBird(g, 72, 80, 36, TYPES[id].color, 0, id); });
-      ov.querySelectorAll("button[data-a]").forEach(b => b.onclick = () => {
-        const id = +b.dataset.i, t = TYPES[id], a = b.dataset.a;
-        if (a === "buy" && save.coins >= t.cost) { save.coins -= t.cost; save.unlocked.push(id); if (save.team.length < 3) save.team.push(id); }
-        else if (a === "add" && save.team.length < 3) save.team.push(id);
-        else if (a === "rm" && save.team.length > 1) save.team = save.team.filter(x => x !== id);
-        persist(); birdShop();
-      });
-      $("bk").onclick = mainMenu; ov.scrollTop = sc;
-    });
-  }
-  function win() {
-    state = "won"; hb.style.display = "none";
-    const left = birdsRemaining(), n = spec.birds;
-    const stars = left >= Math.ceil(n / 3) ? 3 : left >= 1 ? 2 : 1;
-    score += left * 10000;
-    const first = !(save.stars[level] > 0);
-    const raw = 40 + 15 * stars + 3 * level, bonus = first ? raw : Math.floor(raw / 3);
-    save.coins += bonus; save.stars[level] = Math.max(save.stars[level] || 0, stars);
-    save.maxL = Math.max(save.maxL, Math.min(LCOUNT - 1, level + 1)); save.currentLevel = Math.min(LCOUNT - 1, level + 1); persist();
-    const last = level === LCOUNT - 1;
-    show(`<h1>${last ? "सब लेवल पूरे!" : "वाह! लेवल पूरा"}</h1><div id="stars">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</div>
-      <p>स्कोर: ${score}</p><p>सिक्के: +${coinsThisLevel + bonus} (कुल ${save.coins})</p>
-      <div class="row">${last ? "" : '<button id="nx">अगला लेवल</button>'}<button class="alt" id="rp">फिर खेलें</button><button class="alt" id="mm">मेन्यू</button></div>`, () => {
-      if (!last) $("nx").onclick = () => startLevel(level + 1);
-      $("rp").onclick = () => { score = levelStartScore; loadLevel(level); };
-      $("mm").onclick = mainMenu;
-    });
-    snd(523, 0.15, "triangle", 0.07); setTimeout(() => snd(659, 0.15, "triangle", 0.07), 150); setTimeout(() => snd(784, 0.3, "triangle", 0.07), 300);
-  }
-  function lose() {
-    state = "lost"; hb.style.display = "none";
-    show(`<h1>इस बार नहीं हुआ</h1><p>गुब्बारा-भूत अभी बाकी हैं. पक्षी की ताक़त (टैप) सही समय पर इस्तेमाल करें, और पक्षी बदलकर टीम बनाएँ.</p>
-      <div class="row"><button id="rt">फिर कोशिश करें</button><button class="alt" id="mm">मेन्यू</button></div>`, () => {
-      $("rt").onclick = () => { score = levelStartScore; loadLevel(level); };
-      $("mm").onclick = mainMenu;
-    });
-  }
-
-  // ---------- drawing ----------
-  function drawBird(c, x, y, r, color, ang, id) {
-    const t = TYPES[id] || TYPES[0];
-    c.save(); c.translate(x, y); c.rotate(ang || 0);
-    if (id !== 14) {
-      c.strokeStyle = color; c.lineWidth = Math.max(2, r * 0.16); c.lineCap = "round";
-      for (let i = -1; i <= 1; i++) { c.beginPath(); c.moveTo(i * r * 0.2, -r * 0.9); c.quadraticCurveTo(i * r * 0.4, -r * 1.5, i * r * 0.65 + r * 0.1, -r * 1.55); c.stroke(); }
-    }
-    c.fillStyle = color; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.fill();
-    c.strokeStyle = "rgba(0,0,0,0.25)"; c.lineWidth = Math.max(1.5, r * 0.07); c.stroke();
-    c.fillStyle = "rgba(255,255,255,0.28)"; c.beginPath(); c.ellipse(-r * 0.3, -r * 0.5, r * 0.45, r * 0.22, -0.5, 0, 6.283); c.fill();
-    c.fillStyle = t.belly || "rgba(255,255,255,0.9)"; c.beginPath(); c.ellipse(0, r * 0.4, r * 0.62, r * 0.45, 0, 0, 6.283); c.fill();
-    c.fillStyle = "#fff"; c.beginPath(); c.arc(r * 0.3, -r * 0.12, r * 0.3, 0, 6.283); c.arc(r * 0.78, -r * 0.08, r * 0.26, 0, 6.283); c.fill();
-    c.fillStyle = "#1a1233"; c.beginPath(); c.arc(r * 0.38, -r * 0.1, r * 0.14, 0, 6.283); c.arc(r * 0.84, -r * 0.06, r * 0.12, 0, 6.283); c.fill();
-    c.fillStyle = "#ff8a2a"; c.beginPath(); c.moveTo(r * 0.45, r * 0.14); c.lineTo(r * 1.1, r * 0.27); c.lineTo(r * 0.45, r * 0.44); c.closePath(); c.fill();
-    const k = id % 5, s = r * 0.15, my = -r * 0.66;
-    c.fillStyle = t.acc;
-    if (k === 0) { c.fillRect(-s * 1.7, my - s * 0.4, s * 1.2, s * 0.8); c.fillRect(s * 0.5, my - s * 0.4, s * 1.2, s * 0.8); }
-    else if (k === 1) { c.beginPath(); c.arc(0, my, s, 0, 6.283); c.fill(); }
-    else if (k === 2) { c.beginPath(); c.moveTo(0, my - s * 1.3); c.lineTo(s * 1.1, my); c.lineTo(0, my + s * 1.3); c.lineTo(-s * 1.1, my); c.closePath(); c.fill(); }
-    else if (k === 3) { c.beginPath(); c.arc(-s * 0.6, my - s * 0.2, s * 0.7, 0, 6.283); c.arc(s * 0.6, my - s * 0.2, s * 0.7, 0, 6.283); c.moveTo(-s * 1.25, my); c.lineTo(0, my + s * 1.5); c.lineTo(s * 1.25, my); c.closePath(); c.fill(); }
-    else { c.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.5708 + i * 0.6283, d = i % 2 ? s * 0.55 : s * 1.3; c.lineTo(Math.cos(a) * d, my + Math.sin(a) * d); } c.closePath(); c.fill(); }
-    if (id === 4) { c.strokeStyle = "#8a5524"; c.lineWidth = Math.max(2, r * 0.1); c.beginPath(); c.moveTo(0, -r); c.lineTo(r * 0.2, -r * 1.35); c.stroke(); c.fillStyle = "#ffa31a"; c.beginPath(); c.arc(r * 0.2, -r * 1.4, r * 0.14, 0, 6.283); c.fill(); }
-    if (id === 14) { c.fillStyle = "#ffd23f"; c.beginPath(); c.moveTo(-r * 0.6, -r * 0.85); c.lineTo(-r * 0.6, -r * 1.45); c.lineTo(-r * 0.3, -r * 1.15); c.lineTo(0, -r * 1.6); c.lineTo(r * 0.3, -r * 1.15); c.lineTo(r * 0.6, -r * 1.45); c.lineTo(r * 0.6, -r * 0.85); c.closePath(); c.fill(); c.strokeStyle = "rgba(0,0,0,0.3)"; c.lineWidth = 1.5; c.stroke(); }
-    c.restore();
-  }
-  function drawTarget(b) {
-    const r = b.r, w = b.hit > 0 ? Math.sin(b.hit) * 2 : 0;
-    ctx.save(); ctx.translate(b.position.x + w, b.position.y); ctx.rotate(b.angle * 0.5);
-    ctx.fillStyle = "#b46be0"; ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.283); ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.ellipse(-r * 0.35, -r * 0.45, r * 0.3, r * 0.18, -0.6, 0, 6.283); ctx.fill();
-    ctx.fillStyle = "#b46be0"; ctx.beginPath(); ctx.moveTo(-5, r - 2); ctx.lineTo(5, r - 2); ctx.lineTo(0, r + 7); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-r * 0.36, -r * 0.1, r * 0.28, 0, 6.283); ctx.arc(r * 0.36, -r * 0.1, r * 0.28, 0, 6.283); ctx.fill();
-    ctx.fillStyle = "#1a1233"; ctx.beginPath(); ctx.arc(-r * 0.33, -r * 0.06, r * 0.13, 0, 6.283); ctx.arc(r * 0.39, -r * 0.06, r * 0.13, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = "#1a1233"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, r * 0.28, r * 0.28, 0.2, 2.9); ctx.stroke();
-    if (b.hp < b.maxHp * 0.6) { ctx.strokeStyle = "rgba(26,18,51,0.7)"; ctx.beginPath(); ctx.moveTo(-r * 0.5, -r * 0.7); ctx.lineTo(-r * 0.1, -r * 0.35); ctx.stroke(); }
-    ctx.restore();
-  }
-  function drawBox(b) {
-    ctx.save(); ctx.translate(b.position.x, b.position.y); ctx.rotate(b.angle);
-    const stone = b.mat === "stone";
-    ctx.fillStyle = stone ? "#d6a978" : "#b97a3e"; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
-    ctx.strokeStyle = stone ? "#a97c4f" : "#8a5524"; ctx.lineWidth = 2; ctx.strokeRect(-b.w / 2 + 1, -b.h / 2 + 1, b.w - 2, b.h - 2);
-    ctx.lineWidth = 1; ctx.beginPath();
-    if (stone) { for (let y = -b.h / 2 + 14; y < b.h / 2 - 4; y += 18) { ctx.moveTo(-b.w / 2 + 2, y); ctx.lineTo(b.w / 2 - 2, y); } }
-    else if (b.w > b.h) { for (let y = -b.h / 2 + 6; y < b.h / 2 - 2; y += 6) { ctx.moveTo(-b.w / 2 + 3, y); ctx.lineTo(b.w / 2 - 3, y); } }
-    else { for (let x = -b.w / 2 + 6; x < b.w / 2 - 2; x += 6) { ctx.moveTo(x, -b.h / 2 + 3); ctx.lineTo(x, b.h / 2 - 3); } }
-    ctx.globalAlpha = 0.35; ctx.stroke(); ctx.globalAlpha = 1;
-    ctx.strokeStyle = "#3b2410"; ctx.lineWidth = 2;
-    if (b.hp < b.maxHp * 0.7) { ctx.beginPath(); ctx.moveTo(-b.w / 3, -b.h / 2); ctx.lineTo(-b.w / 8, 0); ctx.lineTo(0, b.h / 2); ctx.stroke(); }
-    if (b.hp < b.maxHp * 0.4) { ctx.beginPath(); ctx.moveTo(b.w / 3, -b.h / 2); ctx.lineTo(b.w / 6, -b.h / 6); ctx.lineTo(b.w / 3, b.h / 3); ctx.moveTo(-b.w / 8, 0); ctx.lineTo(-b.w / 3, b.h / 3); ctx.stroke(); }
-    if (b.hit > 0) { ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); }
-    ctx.restore();
-  }
-  const FONT = "'Noto Sans Devanagari','Mangal','Nirmala UI',system-ui,sans-serif";
-  function render() {
-    tMs += 16;
-    ctx.save();
-    if (shake > 0.3) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-    const sky = ctx.createLinearGradient(0, 0, 0, GY);
-    sky.addColorStop(0, "#2b1d5c"); sky.addColorStop(0.55, "#a8467a"); sky.addColorStop(1, "#ffb066");
-    ctx.fillStyle = sky; ctx.fillRect(-20, -20, W + 40, H + 40);
-    ctx.fillStyle = "#ffe3a0"; ctx.beginPath(); ctx.arc(1010, 430, 70, 0, 6.283); ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,0.14)";
-    for (let i = 0; i < 4; i++) { const cx = ((i * 380 + tMs * 0.012) % (W + 300)) - 150, cy = 90 + i * 55; ctx.beginPath(); ctx.ellipse(cx, cy, 110, 24, 0, 0, 6.283); ctx.ellipse(cx + 60, cy - 14, 70, 22, 0, 0, 6.283); ctx.fill(); }
-    ctx.fillStyle = "#5b2a62"; ctx.beginPath(); ctx.moveTo(-10, GY);
-    for (let x = 0; x <= W; x += 40) ctx.lineTo(x, GY - 90 - 40 * Math.abs(Math.sin(x * 0.011)) - (((x / 40) | 0) % 3 === 0 ? 14 : 0));
-    ctx.lineTo(W + 10, GY); ctx.fill();
-    ctx.fillStyle = "#6b3f2a"; ctx.fillRect(-20, GY, W + 40, H - GY + 20);
-    ctx.fillStyle = "#c07a43"; ctx.fillRect(-20, GY, W + 40, 10);
-
-    if (state !== "menu") {
-      ctx.strokeStyle = "#4a2a14"; ctx.lineWidth = 14; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(ANCH.x, GY); ctx.lineTo(ANCH.x, ANCH.y + 50); ctx.stroke();
-      ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(ANCH.x, ANCH.y + 50); ctx.lineTo(ANCH.x - 18, ANCH.y - 8); ctx.moveTo(ANCH.x, ANCH.y + 50); ctx.lineTo(ANCH.x + 18, ANCH.y - 8); ctx.stroke();
-      const bp = bird && !bird.flying ? bird.position : ANCH;
-      ctx.strokeStyle = "#2a1408"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(ANCH.x - 18, ANCH.y - 8); ctx.lineTo(bp.x, bp.y); ctx.stroke();
-      for (let k = li; k < lineup.length; k++) {
-        const i = k - li, e = lineup[k];
-        drawBird(ctx, 70 + i * 44, GY - 18, 16, TYPES[e.id].color, 0, e.id);
-        if (e.guest) { ctx.fillStyle = "#ffe36a"; ctx.font = "700 16px " + FONT; ctx.textAlign = "center"; ctx.fillText("★", 70 + i * 44, GY - 42); }
-      }
-      for (const b of items) if (b.label === "block") drawBox(b);
-      for (const b of items) if (b.label === "target") drawTarget(b);
-      if (dragging && bird) {
-        let px = bird.position.x, py = bird.position.y, vx = (ANCH.x - px) * 0.22, vy = (ANCH.y - py) * 0.22;
-        for (let i = 0; i < 46; i++) {
-          vy += 0.2778; px += vx; py += vy;
-          if (i % 3 === 2 && py < GY) { ctx.fillStyle = `rgba(255,247,232,${1 - i / 50})`; ctx.beginPath(); ctx.arc(px, py, 4, 0, 6.283); ctx.fill(); }
-        }
-      }
-      for (const c of extras) {
-        if (c.kind === "egg") { ctx.save(); ctx.translate(c.position.x, c.position.y); ctx.rotate(c.angle); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.ellipse(0, 0, c.r * 0.85, c.r * 1.1, 0, 0, 6.283); ctx.fill(); ctx.restore(); }
-        else if (c.kind === "mini") { ctx.fillStyle = "#222"; ctx.beginPath(); ctx.arc(c.position.x, c.position.y, c.r, 0, 6.283); ctx.fill(); ctx.fillStyle = "#ffa31a"; ctx.beginPath(); ctx.arc(c.position.x + 3, c.position.y - c.r, 3, 0, 6.283); ctx.fill(); }
-        else drawBird(ctx, c.position.x, c.position.y, c.r, c.color, c.angle, c.tid);
-      }
-      if (bird) {
-        if (bird.hammer || bird.rocketT > 0) { ctx.fillStyle = "rgba(255,200,80,0.35)"; ctx.beginPath(); ctx.arc(bird.position.x, bird.position.y, bird.r + 8, 0, 6.283); ctx.fill(); }
-        drawBird(ctx, bird.position.x, bird.position.y, bird.r, bird.color, bird.flying ? bird.angle : 0, bird.tid);
-      }
-      ctx.strokeStyle = "#2a1408"; ctx.lineWidth = 6; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(ANCH.x + 18, ANCH.y - 8); ctx.lineTo(bp.x, bp.y); ctx.stroke();
-      ctx.strokeStyle = "#6a3b1c"; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(ANCH.x, ANCH.y + 50); ctx.lineTo(ANCH.x + 18, ANCH.y - 8); ctx.stroke();
-      for (const r of rings) { ctx.strokeStyle = `rgba(255,255,255,${Math.min(1, r.a)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, 6.283); ctx.stroke(); }
-      for (const p of particles) {
-        ctx.globalAlpha = Math.min(1, p.life / 25); ctx.fillStyle = p.c;
-        if (p.chip) { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillRect(-p.s, -p.s / 3, p.s * 2, p.s * 0.66); ctx.restore(); } else ctx.fillRect(p.x, p.y, p.s, p.s);
-      }
-      ctx.globalAlpha = 1;
-      ctx.font = "700 22px " + FONT; ctx.textAlign = "center";
-      for (const f of floaters) { ctx.fillStyle = `rgba(255,226,110,${Math.min(1, f.t / 25)})`; ctx.fillText(f.txt, f.x, f.y); }
-      ctx.fillStyle = "#fff7e8"; ctx.font = "700 28px " + FONT;
-      ctx.textAlign = "left"; ctx.fillText("लेवल " + (level + 1), 24, 44);
-      ctx.textAlign = "center"; ctx.fillText(String(score), W / 2, 44);
-      ctx.textAlign = "left"; ctx.fillStyle = "#ffe36a"; ctx.fillText("सिक्के " + save.coins, W / 2 + 190, 44);
-      if (bird && !bird.used && state === "play") {
-        const t = TYPES[bird.tid];
-        ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,247,232,0.9)"; ctx.font = "600 22px " + FONT;
-        ctx.fillText((bird.guest ? "मेहमान ★ " : "") + t.name + ": " + (bird.flying ? "टैप करो · " : "") + t.desc, W / 2, H - 14);
-      }
-      ctx.textAlign = "left";
-    }
-    ctx.restore();
-  }
-
-  // ---------- loop ----------
-  let last = performance.now(), acc = 0;
-  function frame(now) {
-    const dt = Math.min(100, now - last); last = now;
-    if (state === "play" || state === "won" || state === "lost") { acc += dt; while (acc >= 1000 / 60) { step(); acc -= 1000 / 60; } }
-    render(); requestAnimationFrame(frame);
-  }
-  engine = Engine.create();
-  mainMenu();
-  requestAnimationFrame(frame);
+(()=>{
+'use strict';
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id);
+let W=960,H=540,scale=1,camX=0,last=0,raf=0,mode='menu',difficulty='normal',level=1,coins=0,lives=3,world=null,player=null,keys={left:false,right:false},jumpQueued=false,toastTimer=0,levelPick=false;
+const saveKey='mskyadventure_save_v1';
+let saved={unlocked:1,coins:0,done:[],difficulty:'normal',currentLevel:1};
+try{saved={...saved,...JSON.parse(localStorage.getItem(saveKey)||'{}')}}catch(e){}
+coins=saved.coins||0;difficulty=saved.difficulty||'normal';
+function save(){try{localStorage.setItem(saveKey,JSON.stringify(saved))}catch(e){}}
+function resize(){const dpr=Math.min(devicePixelRatio||1,2);/* clientWidth/clientHeight are the unrotated landscape layout size; getBoundingClientRect() is rotated on portrait phones. */const cw=canvas.clientWidth||960,ch=canvas.clientHeight||540;canvas.width=Math.max(1,Math.round(cw*dpr));canvas.height=Math.max(1,Math.round(ch*dpr));W=960;H=540;const sx=canvas.width/W,sy=canvas.height/H;ctx.setTransform(sx,0,0,sy,0,0);}
+window.addEventListener('resize',resize);screen.orientation?.lock?.('landscape').catch?.(()=>{});resize();
+function toast(s){$('toast').textContent=s;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1500)}
+function randGen(seed){return ()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
+const diffSettings={easy:{speed:3.5,jump:10.8,gap:.76,enemy:.7,label:'आसान'},normal:{speed:4.1,jump:10.4,gap:1,label:'सामान्य'},hard:{speed:4.7,jump:10.1,gap:1.22,label:'कठिन'}};
+function buildLevel(n){
+ const rnd=randGen(n*9176+321),d=diffSettings[difficulty],plats=[],gems=[],enemies=[],checkpoints=[],powerBoxes=[];
+ let x=0,y=410;plats.push({x:0,y:445,w:390,h:95,type:'ground'});
+ let total=3800+n*37;
+ while(x<total){
+  let gap=(95+rnd()*90)*d.gap, pw=120+rnd()*120;
+  x+=gap;
+  y=Math.max(260,Math.min(435,y+(rnd()-.48)*115));
+  if(n%10===0 && rnd()>.55)y=310+rnd()*75;
+  plats.push({x,y,w:pw,h:20,type:rnd()>.72?'moving':'grass',phase:rnd()*6,amp:rnd()>.6?18:0,baseY:y});
+  for(let j=0;j<1+Math.floor(rnd()*3);j++)gems.push({x:x+24+j*29,y:y-35-rnd()*13,r:10,got:false,bob:rnd()*6});
+  // Power boxes are intentionally rare: roughly one every 8 platforms, with some skipped.
+  if(plats.length%8===0 && rnd()>.25)powerBoxes.push({x:x+pw*.5-14,y:y-57,w:28,h:28,used:false,bob:rnd()*6,type:['speed','jump','shield','bonus'][Math.floor(rnd()*4)]});
+  if(n>1 && rnd()<(.16+(n/100)*.14))enemies.push({x:x+pw*.55,y:y-29,w:28,h:29,minX:x+8,maxX:x+pw-34,vx:(rnd()>.5?1:-1)*(.6+n*.009),alive:true});
+  if(n%4===0 && plats.length%5===0)checkpoints.push({x:x+pw*.45,y:y-35,platformX:x,platformY:y,platformW:pw,active:false});
+  x+=pw;
+ }
+ plats.push({x:total+100,y:445,w:440,h:95,type:'ground'});
+ return {plats,gems,enemies,checkpoints,powerBoxes,endX:total+390,seed:n};
+}
+function startLevel(n){level=Math.max(1,Math.min(100,n));saved.currentLevel=level;saved.difficulty=difficulty;save();world=buildLevel(level);lives=3;camX=0;
+ const p0=world.plats[0];player={x:70,y:p0.y-48,w:32,h:45,vx:0,vy:0,onGround:false,spawnX:70,spawnY:p0.y-48,face:1,invuln:0,anim:0,powerTimer:0,powerType:'',shield:0};
+ mode='play';$('overlay').style.display='none';updateHud();last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}
+function updateHud(){$('levelLabel').textContent=`LEVEL ${level}/100`;$('coins').textContent=coins;$('lives').textContent=lives;$('difficulty').textContent=diffSettings[difficulty].label.toUpperCase();document.querySelectorAll('[data-diff]').forEach(b=>b.classList.toggle('selected',b.dataset.diff===difficulty));}
+function drawBackground(t){
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#12224f');g.addColorStop(.55,'#2765a6');g.addColorStop(1,'#7bd0e8');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // sun glow
+ let sg=ctx.createRadialGradient(785,90,10,785,90,90);sg.addColorStop(0,'#fff7bfdd');sg.addColorStop(1,'#fff7bf00');ctx.fillStyle=sg;ctx.fillRect(680,0,210,200);ctx.fillStyle='#fff0a8';ctx.beginPath();ctx.arc(785,90,26,0,Math.PI*2);ctx.fill();
+ for(let i=0;i<5;i++){let cx=((i*245-camX*.12)%(W+240)+W+240)%(W+240)-100,cy=90+(i%3)*60;ctx.fillStyle='#ffffff25';ctx.beginPath();ctx.ellipse(cx,cy,38,16,0,0,Math.PI*2);ctx.ellipse(cx+24,cy-9,26,22,0,0,Math.PI*2);ctx.ellipse(cx+49,cy,35,15,0,0,Math.PI*2);ctx.fill()}
+ // distant layered hills
+ for(let layer=0;layer<3;layer++){let base=360+layer*42;ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,base);for(let x=-100-(camX*(.12+layer*.09)%180);x<W+180;x+=180){ctx.lineTo(x+90,base-65-layer*9);ctx.lineTo(x+180,base+12)}ctx.lineTo(W,H);ctx.closePath();ctx.fillStyle=['#1c567d','#17476c','#153958'][layer];ctx.fill()}
+}
+function roundRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}}
+function drawPlatform(p,t){
+ let x=p.x-camX,y=p.y;
+ if(p.type==='moving'){y=p.baseY+Math.sin(t*.0018+p.phase)*p.amp}
+ if(x+p.w< -40||x>W+40)return;
+ // shadow and side face for pseudo-3D depth
+ roundRect(x+4,y+8,p.w,p.h+12,5,'#11274470');
+ roundRect(x,y+10,p.w,p.h+11,5,'#75452f');
+ ctx.fillStyle='#b56b43';ctx.fillRect(x+3,y+13,p.w-6,p.h+3);
+ ctx.fillStyle='#8d5139';for(let k=12;k<p.w;k+=37){ctx.beginPath();ctx.arc(x+k,y+26,3,0,Math.PI*2);ctx.fill()}
+ roundRect(x,y,p.w,13,5,p.type==='ground'?'#57dfae':'#53e2ac');
+ ctx.fillStyle='#b4ffe4';for(let k=8;k<p.w-4;k+=30){ctx.beginPath();ctx.moveTo(x+k,y+1);ctx.lineTo(x+k+5,y-7);ctx.lineTo(x+k+10,y+1);ctx.fill()}
+ ctx.fillStyle='#ffffff30';ctx.fillRect(x+5,y+3,Math.max(0,p.w-10),2);
+}
+function drawGem(g,t){if(g.got)return;let x=g.x-camX,y=g.y+Math.sin(t*.004+g.bob)*5;ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(t*.003+g.bob)*.15);ctx.shadowColor='#fff09b';ctx.shadowBlur=13;ctx.fillStyle='#ffdb4e';ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(9,-2);ctx.lineTo(0,12);ctx.lineTo(-9,-2);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff7bf';ctx.lineWidth=2;ctx.stroke();ctx.restore()}
+function drawPowerBox(b,t){if(b.used)return;const x=b.x-camX,y=b.y+Math.sin(t*.004+b.bob)*4;if(x< -40||x>W+40)return;const colors={speed:'#62f5d4',jump:'#a78bfa',shield:'#60c9ff',bonus:'#ffd95b'};const symbols={speed:'»',jump:'↑',shield:'✦',bonus:'◆'};ctx.save();ctx.translate(x+b.w/2,y+b.h/2);ctx.rotate(Math.sin(t*.003+b.bob)*.06);ctx.shadowColor=colors[b.type];ctx.shadowBlur=17;const grad=ctx.createLinearGradient(-12,-12,12,12);grad.addColorStop(0,'#fff');grad.addColorStop(.25,colors[b.type]);grad.addColorStop(1,'#3159a5');roundRect(-14,-14,28,28,7,grad,'#ffffff');ctx.shadowBlur=0;ctx.fillStyle='#102044';ctx.font='bold 19px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(symbols[b.type],0,1);ctx.restore()}
+function drawEnemy(e,t){if(!e.alive)return;let x=e.x-camX,y=e.y;ctx.save();ctx.translate(x+e.w/2,y+e.h/2);ctx.fillStyle='#55275e';ctx.beginPath();ctx.ellipse(0,2,15,15,0,0,Math.PI*2);ctx.fill();let gr=ctx.createLinearGradient(-10,-14,10,15);gr.addColorStop(0,'#ff9d72');gr.addColorStop(1,'#d83e63');ctx.fillStyle=gr;ctx.beginPath();ctx.ellipse(0,0,13,14,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(-4,-3,4,0,Math.PI*2);ctx.arc(5,-3,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a2445';ctx.beginPath();ctx.arc(-3,-2,1.8,0,Math.PI*2);ctx.arc(6,-2,1.8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#492a50';ctx.fillRect(-9,12,7,5);ctx.fillRect(3,12,7,5);ctx.restore()}
+function drawPlayer(t){
+ if(!player)return;let p=player,x=p.x-camX,y=p.y;if(p.invuln>0&&Math.floor(t/90)%2===0)return;
+ const bob=p.onGround?Math.sin(p.anim*.2)*1.2:0;
+ // shadow
+ ctx.fillStyle='#07162b55';ctx.beginPath();ctx.ellipse(x+p.w/2,y+p.h+3,17,5,0,0,Math.PI*2);ctx.fill();
+ ctx.save();ctx.translate(x+p.w/2,y+bob);if(p.face<0)ctx.scale(-1,1);
+ // Animated legs and shoes: swing while running, tuck slightly while jumping.
+ const swing=p.onGround&&Math.abs(p.vx)>0.2?Math.sin(p.anim*.85)*6:0;
+ ctx.save();ctx.translate(-6,29);ctx.rotate(swing*.035);roundRect(-5,0,9,10,4,'#f1b26b','#9b633b');ctx.restore();
+ ctx.save();ctx.translate(6,29);ctx.rotate(-swing*.035);roundRect(-4,0,9,10,4,'#f1b26b','#9b633b');ctx.restore();
+ roundRect(-14,34+swing*.12,13,10,4,'#ffcf4f','#a56b36');roundRect(2,34-swing*.12,14,10,4,'#ffcf4f','#a56b36');
+ // Small swinging arms add a clearer run cycle.
+ ctx.save();ctx.translate(-13,14);ctx.rotate(-swing*.025);roundRect(-3,0,7,17,4,'#ffb941','#9b662f');ctx.restore();
+ ctx.save();ctx.translate(13,14);ctx.rotate(swing*.025);roundRect(-3,0,7,17,4,'#ffb941','#9b662f');ctx.restore();
+ // body with glossy side
+ let body=ctx.createLinearGradient(-14,0,14,0);body.addColorStop(0,'#d93458');body.addColorStop(.45,'#ff6579');body.addColorStop(1,'#a91e4b');
+ roundRect(-15,2,30,34,9,body,'#ff9ba6');
+ ctx.fillStyle='#ffffff35';ctx.beginPath();ctx.ellipse(-6,10,4,11,-.2,0,Math.PI*2);ctx.fill();
+ // backpack/side ear pads
+ roundRect(-20,8,7,17,4,'#ffb941','#9b662f');roundRect(13,8,7,17,4,'#ffb941','#9b662f');
+ // face
+ let face=ctx.createLinearGradient(-10,5,11,29);face.addColorStop(0,'#ffe8bd');face.addColorStop(1,'#e8a66f');
+ ctx.fillStyle=face;ctx.beginPath();ctx.ellipse(0,20,11,12,0,0,Math.PI*2);ctx.fill();
+ // hair/helmet
+ let hg=ctx.createLinearGradient(0,-4,0,10);hg.addColorStop(0,'#ff7890');hg.addColorStop(1,'#b91d49');ctx.fillStyle=hg;ctx.beginPath();ctx.roundRect(-14,-7,28,14,6);ctx.fill();ctx.fillStyle='#ffb1b5';ctx.fillRect(-8,-5,13,3);
+ // eyes and smile
+ ctx.fillStyle='#1c2844';ctx.beginPath();ctx.arc(-4,18,1.8,0,Math.PI*2);ctx.arc(4,18,1.8,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#9b4050';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(0,22,4,0.15,Math.PI-.15);ctx.stroke();
+ // highlights
+ ctx.fillStyle='#fff9';ctx.beginPath();ctx.arc(-7,14,1.4,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+function drawCheckpoint(c){let x=c.x-camX;if(x< -30||x>W+30)return;ctx.fillStyle=c.active?'#fff59d':'#d6e7ff';ctx.fillRect(x, c.y,4,36);ctx.fillStyle=c.active?'#ffdc57':'#7de5ff';ctx.beginPath();ctx.moveTo(x+4,c.y+2);ctx.lineTo(x+27,c.y+10);ctx.lineTo(x+4,c.y+18);ctx.closePath();ctx.fill()}
+function drawGoal(t){let x=world.endX-camX;if(x< -80||x>W+100)return;ctx.save();ctx.translate(x,360);ctx.shadowColor='#64ffdb';ctx.shadowBlur=20;ctx.strokeStyle='#a5ffe8';ctx.lineWidth=8;ctx.beginPath();ctx.ellipse(0,35,22,48,0,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#ffffffaa';ctx.font='bold 16px system-ui';ctx.textAlign='center';ctx.fillText('GO!',0,42);ctx.restore()}
+function respawnPlayer(){if(!player)return;player.x=player.spawnX;player.y=player.spawnY;player.vx=0;player.vy=0;player.onGround=false;player.invuln=90;camX=Math.max(0,Math.min(world.endX-W+130,player.x-W*.32));}
+function update(dt,t){
+ if(mode!=='play'||!player)return;const p=player,d=diffSettings[difficulty],f=Math.min(dt/16.67,2.3);
+ let dir=(keys.right?1:0)-(keys.left?1:0);const runSpeed=d.speed*(p.powerType==='speed'?1.65:1);p.vx=dir*runSpeed*f;if(dir)p.face=dir;p.anim+=Math.abs(p.vx)*.5;
+ if(jumpQueued&&p.onGround){p.vy=-(d.jump*(p.powerType==='jump'?1.45:1));p.onGround=false;}jumpQueued=false;
+ p.vy+=.48*f;p.vy=Math.min(p.vy,13);let oldY=p.y;p.x+=p.vx*f;p.y+=p.vy*f;p.onGround=false;
+ // platforms: land only while falling; prevents teleporting to the wrong platform
+ for(const pl of world.plats){let py=pl.type==='moving'?pl.baseY+Math.sin(t*.0018+pl.phase)*pl.amp:pl.y;
+  if(p.x+p.w>pl.x+3&&p.x<pl.x+pl.w-3&&p.vy>=0&&oldY+p.h<=py+8&&p.y+p.h>=py){p.y=py-p.h;p.vy=0;p.onGround=true;}}
+ // gems
+ for(const g of world.gems){if(g.got)continue;let gx=g.x,gy=g.y+Math.sin(t*.004+g.bob)*5;if(p.x+p.w>gx-10&&p.x<gx+10&&p.y+p.h>gy-12&&p.y<gy+12){g.got=true;coins++;saved.coins=coins;save();updateHud();}}
+ // Collect power boxes. Boost effects are temporary and have a visible toast.
+ for(const b of world.powerBoxes){if(b.used)continue;const by=b.y+Math.sin(t*.004+b.bob)*4;if(p.x+p.w>b.x&&p.x<b.x+b.w&&p.y+p.h>by&&p.y<by+b.h){b.used=true;if(b.type==='bonus'){coins+=5;saved.coins=coins;save();toast('बोनस बॉक्स! +5 कॉइन ✨')}else{p.powerType=b.type;p.powerTimer=600;if(b.type==='shield'){p.shield=600;p.invuln=Math.max(p.invuln,600);toast('शील्ड पावर! 10 सेकंड 🛡️')}else if(b.type==='speed')toast('स्पीड पावर! 10 सेकंड ⚡');else toast('सुपर जंप! 10 सेकंड ⬆️')}updateHud();}}
+ if(p.powerTimer>0){p.powerTimer=Math.max(0,p.powerTimer-f);if(p.powerTimer===0){p.powerType='';p.shield=0;toast('पावर खत्म')}}
+ // checkpoints
+ for(const c of world.checkpoints){if(!c.active&&p.x+p.w>c.x-5&&p.x<c.x+20&&p.y+p.h>c.y&&p.y<c.y+42){c.active=true;p.spawnX=Math.max(c.platformX+8,Math.min(c.x,c.platformX+c.platformW-p.w-8));p.spawnY=c.platformY-p.h-1;toast('चेकपॉइंट सेव!');}}
+ // enemies: stomping defeats; otherwise damage with brief invulnerability
+ for(const e of world.enemies){if(!e.alive)continue;e.x+=e.vx*f;if(e.x<e.minX||e.x>e.maxX)e.vx*=-1;
+  if(p.x+p.w>e.x+3&&p.x<e.x+e.w-3&&p.y+p.h>e.y+3&&p.y<e.y+e.h-2){
+   if(p.vy>1&&oldY+p.h<e.y+13){e.alive=false;p.vy=-6.3;coins+=2;saved.coins=coins;save();updateHud();}
+   else if(p.invuln<=0){lives--;p.invuln=85;p.vx=-p.face*4;p.vy=-5;updateHud();if(lives<=0){lives=3;respawnPlayer();toast('चेकपॉइंट से फिर शुरू');updateHud();}}
+  }}
+ p.invuln=Math.max(0,p.invuln-f);if(p.powerType==='shield'&&p.powerTimer>0)p.invuln=Math.max(p.invuln,2);
+ if(p.y>H+180||p.x<camX-180){respawnPlayer();toast('सेफ़ चेकपॉइंट पर वापसी');}
+ camX=Math.max(0,Math.min(world.endX-W+130,p.x-W*.32));
+ if(p.x>world.endX-40){completeLevel();}
+}
+function completeLevel(){if(mode!=='play')return;mode='win';saved.done=saved.done||[];if(!saved.done.includes(level))saved.done.push(level);saved.unlocked=Math.max(saved.unlocked||1,Math.min(100,level+1));saved.currentLevel=Math.min(100,level+1);saved.coins=coins;saved.difficulty=difficulty;save();$('overlay').style.display='flex';$('panel').innerHTML=`<div class="logo">M</div><h1>लेवल ${level} पूरा! ✨</h1><div class="sub">शानदार! कॉइन्स: ${coins}<br>तुम्हारी प्रोग्रेस अपने-आप सेव हो गई।</div><div class="row"><button class="primary" id="nextBtn">${level<100?'अगला लेवल ▶':'फिर से खेलें ↻'}</button><button class="secondary" id="menuBtn">मेन्यू</button></div>`;$('nextBtn').onclick=()=>startLevel(level<100?level+1:1);$('menuBtn').onclick=showMenu;}
+function draw(t){
+ drawBackground(t);
+ if(world){for(const pl of world.plats)drawPlatform(pl,t);for(const b of world.powerBoxes)drawPowerBox(b,t);for(const c of world.checkpoints)drawCheckpoint(c);for(const g of world.gems)drawGem(g,t);for(const e of world.enemies)drawEnemy(e,t);drawGoal(t);drawPlayer(t);}
+}
+function loop(t){if(mode!=='play')return;let dt=Math.min(40,t-last||16);last=t;update(dt,t);draw(t);raf=requestAnimationFrame(loop)}
+function showMenu(){mode='menu';$('overlay').style.display='flex';$('panel').innerHTML=`<div class="logo">M</div><h1>M SKY ADVENTURE</h1><div class="sub">100 अलग-अलग लेवल • पावर बॉक्स, सुपर जंप, स्पीड बूस्ट, शील्ड और रनिंग एनिमेशन</div><div style="font-weight:800">कठिनाई चुनें</div><div class="row" id="difficultyChoices"><button class="choice" data-diff="easy">आसान</button><button class="choice" data-diff="normal">सामान्य</button><button class="choice" data-diff="hard">कठिन</button></div><div class="row"><button class="primary" id="start">गेम शुरू करें ▶</button><button class="secondary" id="continueBtn">जारी रखें ↻</button><button class="secondary" id="levelsBtn">लेवल चुनें</button></div><div class="note">लैंडस्केप स्क्रीन • गिरने पर चेकपॉइंट से वापसी • प्रोग्रेस सेव</div>`;wireMenu();updateHud()}
+function wireMenu(){document.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{difficulty=b.dataset.diff;saved.difficulty=difficulty;save();updateHud()});$('start').onclick=()=>startLevel(1);const cb=$('continueBtn');if(cb)cb.onclick=()=>startLevel(Math.max(1,Math.min(100,saved.currentLevel||saved.unlocked||1)));$('levelsBtn').onclick=showLevels}
+function showLevels(){let cells='';for(let i=1;i<=100;i++){let open=i<=(saved.unlocked||1),done=(saved.done||[]).includes(i);cells+=`<button class="levelCell ${done?'done':open?'open':''}" ${open?'':'disabled'} data-level="${i}">${i}</button>`} $('panel').innerHTML=`<div class="logo">M</div><h1>लेवल चुनें</h1><div class="sub">खुले हुए लेवल पर टैप करें</div><div id="levelGrid">${cells}</div><button class="secondary" id="backBtn">← वापस</button>`;document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{if(!b.disabled)startLevel(+b.dataset.level)});$('backBtn').onclick=showMenu}
+wireMenu();updateHud();
+function bindHold(id,key){const el=$(id);const down=e=>{e.preventDefault();keys[key]=true;el.classList.add('active')},up=e=>{e.preventDefault();keys[key]=false;el.classList.remove('active')};el.addEventListener('pointerdown',down);['pointerup','pointercancel','pointerleave'].forEach(ev=>el.addEventListener(ev,up))}
+bindHold('left','left');bindHold('right','right');$('jump').addEventListener('pointerdown',e=>{e.preventDefault();jumpQueued=true;$('jump').classList.add('active')});['pointerup','pointercancel','pointerleave'].forEach(ev=>$('jump').addEventListener(ev,()=> $('jump').classList.remove('active')));
+$('pause').onclick=()=>{if(mode==='play'){mode='paused';cancelAnimationFrame(raf);$('overlay').style.display='flex';$('panel').innerHTML=`<div class="logo">Ⅱ</div><h1>गेम रुका हुआ है</h1><div class="row"><button class="primary" id="resume">जारी रखें ▶</button><button class="secondary" id="restart">लेवल फिर शुरू करें</button><button class="secondary" id="mainMenu">मेन्यू</button></div>`;$('resume').onclick=()=>{mode='play';$('overlay').style.display='none';last=performance.now();raf=requestAnimationFrame(loop)};$('restart').onclick=()=>startLevel(level);$('mainMenu').onclick=showMenu}else if(mode==='paused'){mode='play';$('overlay').style.display='none';last=performance.now();raf=requestAnimationFrame(loop)}};
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowUp'||e.key===' '||e.key==='w')jumpQueued=true;if(e.key==='Escape')$('pause').click()});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false});
+draw(0);
 })();
 </script>
 </body>
