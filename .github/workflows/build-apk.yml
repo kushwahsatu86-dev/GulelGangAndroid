@@ -1,8 +1,14 @@
 
-name: Build Gulel Gang APK
+name: HTML Game to APK
 
 on:
   workflow_dispatch:
+    inputs:
+      app_name:
+        description: "Game app name"
+        required: true
+        default: "My Game"
+        type: string
   push:
     branches: [main, master]
 
@@ -14,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Download source
         uses: actions/checkout@v4
 
-      - name: Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -28,20 +34,32 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Create Android project
+      - name: Create Android wrapper
+        env:
+          GAME_NAME: ${{ inputs.app_name }}
         shell: bash
         run: |
           set -e
 
           test -f index.html || {
-            echo "ERROR: Upload your game as index.html first."
+            echo "ERROR: Add your game as index.html"
             exit 1
           }
 
           mkdir -p app/src/main/assets
-          mkdir -p app/src/main/java/com/gulelgang/game
+          mkdir -p app/src/main/java/com/game/builder
+          mkdir -p app/src/main/res/values
 
           cp index.html app/src/main/assets/index.html
+
+          python3 - <<'PY'
+          import os
+          from xml.sax.saxutils import escape
+          name = os.environ.get("GAME_NAME", "").strip() or "My Game"
+          with open("app/src/main/res/values/strings.xml", "w") as f:
+              f.write('<?xml version="1.0" encoding="utf-8"?>\n')
+              f.write('<resources><string name="app_name">' + escape(name) + '</string></resources>')
+          PY
 
           cat > settings.gradle.kts <<'EOF'
           pluginManagement {
@@ -58,7 +76,7 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "GulelGang"
+          rootProject.name = "HTMLGame"
           include(":app")
           EOF
 
@@ -68,22 +86,17 @@ jobs:
           }
           EOF
 
-          cat > gradle.properties <<'EOF'
-          android.useAndroidX=true
-          org.gradle.jvmargs=-Xmx2048m
-          EOF
+          echo "android.useAndroidX=true" > gradle.properties
 
           cat > app/build.gradle.kts <<'EOF'
           plugins {
               id("com.android.application")
           }
-
           android {
-              namespace = "com.gulelgang.game"
+              namespace = "com.game.builder"
               compileSdk = 35
-
               defaultConfig {
-                  applicationId = "com.gulelgang.game"
+                  applicationId = "com.game.builder"
                   minSdk = 23
                   targetSdk = 28
                   versionCode = 1
@@ -96,9 +109,8 @@ jobs:
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET"/>
               <application
-                  android:label="Gulel Gang"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:hardwareAccelerated="true">
+                  android:label="@string/app_name"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity
                       android:name=".MainActivity"
                       android:screenOrientation="landscape"
@@ -113,36 +125,25 @@ jobs:
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/gulelgang/game/MainActivity.java <<'EOF'
-          package com.gulelgang.game;
+          cat > app/src/main/java/com/game/builder/MainActivity.java <<'EOF'
+          package com.game.builder;
 
           import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
-          import android.view.View;
 
           public class MainActivity extends Activity {
               @Override
-              protected void onCreate(Bundle state) {
+              public void onCreate(Bundle state) {
                   super.onCreate(state);
-
-                  getWindow().getDecorView().setSystemUiVisibility(
-                      View.SYSTEM_UI_FLAG_FULLSCREEN
-                      | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                      | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  );
-
+                  getWindow().getDecorView().setSystemUiVisibility(5894 | 1024 | 512);
                   WebView web = new WebView(this);
                   web.setWebViewClient(new WebViewClient());
                   web.getSettings().setJavaScriptEnabled(true);
                   web.getSettings().setDomStorageEnabled(true);
-                  web.getSettings().setDatabaseEnabled(true);
-                  setContentView(web);
                   web.loadUrl("file:///android_asset/index.html");
+                  setContentView(web);
               }
           }
           EOF
@@ -150,8 +151,8 @@ jobs:
       - name: Build APK
         run: gradle assembleDebug
 
-      - name: Upload APK
+      - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: GulelGang-APK
+          name: Android-Game-APK
           path: app/build/outputs/apk/debug/app-debug.apk
